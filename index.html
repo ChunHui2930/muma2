@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>旋转木马</title>
+    <link rel="stylesheet" href="css/css.css" />
+</head>
+
+<body>
+<div class="wrap" id="wrap">
+    <div class="slide" id="slide">
+        <ul>
+            <li>
+                <a href="#"><img src="images/slidepic1.jpg" alt="" /></a>
+            </li>
+            <li>
+                <a href="#"><img src="images/slidepic2.jpg" alt="" /></a>
+            </li>
+            <li>
+                <a href="#"><img src="images/slidepic3.jpg" alt="" /></a>
+            </li>
+            <li>
+                <a href="#"><img src="images/slidepic4.jpg" alt="" /></a>
+            </li>
+            <li>
+                <a href="#"><img src="images/slidepic5.jpg" alt="" /></a>
+            </li>
+        </ul>
+        <div class="arrow" id="arrow">
+            <a href="javascript:;" class="prev" id="arrLeft"></a>
+            <a href="javascript:;" class="next" id="arrRight"></a>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+
+    var config = [{
+        width: 400,
+        top: 20,
+        left: 50,
+        opacity: 0.2,
+        zIndex: 2
+    }, //0
+        {
+            width: 600,
+            top: 70,
+            left: 0,
+            opacity: 0.8,
+            zIndex: 3
+        }, //1
+        {
+            width: 800,
+            top: 100,
+            left: 200,
+            opacity: 1,
+            zIndex: 4
+        }, //2
+        {
+            width: 600,
+            top: 70,
+            left: 600,
+            opacity: 0.8,
+            zIndex: 3
+        }, //3
+        {
+            width: 400,
+            top: 20,
+            left: 750,
+            opacity: 0.2,
+            zIndex: 2
+        } //4
+    ];
+    //根据属性获取当前值函数
+    function getStyle(element,attr) {
+         if(window.getComputedStyle) {
+             return window.getComputedStyle(element,null)[attr];
+         }
+         else{
+             return element.currentStyle[attr];//IE8浏览器的兼容方式
+         }
+    }
+    //封装一个缓慢运动函数
+    function animate2(element,obj) {
+        //先清理定时器，保证每次只开一个
+        clearInterval(element.timer)
+        //开启一个定时器
+        element.timer=setInterval(function () {
+            var flag=true;
+            for(var attr in obj){
+
+              //当属性是透明度时
+                if(attr=="opacity"){
+                    var target=obj[attr];
+                    var current=parseFloat(getStyle(element,attr)); //根据属性取当前值
+
+                    //分别放大后取整
+                    target=Math.floor(target * 100);
+                    current=Math.floor(current * 100);
+                    //计算步长：是为了让运动在后面有一个缓慢停下来
+                    var step=(target-current)/10;
+                    step=target>=current?Math.ceil(step):Math.floor(step);
+                    current+=step; //重新计算当前值
+
+                    element.style[attr]=current/100;
+                }
+                //当属性是层级时
+               else if(attr=="zIndex"){
+                    var target=obj[attr];
+                    var current=target;
+                    element.style[attr]=target;//直接设定目标值
+                }
+                //正常情况的处理
+                else{
+                    var target=obj[attr];
+                    var current=parseInt(getStyle(element,attr));
+                    var step=(target-current)/10;
+                    step=target>=current?Math.ceil(step):Math.floor(step);
+                    //重新修改属性值
+                    current+=step;
+                    element.style[attr]=current+"px"
+                }
+                if(target!=current){
+                    flag=false;
+                }
+
+            }
+               if(flag){
+                   clearInterval(element.timer);//关闭定时器
+               }
+        },20)
+    }
+
+    //获取操作对象
+    var wrap=document.getElementById("wrap");
+    var lis=document.getElementById("wrap").getElementsByTagName("li");
+    var arrow=document.getElementById("arrow");
+    var arrLeft=document.getElementById("arrLeft");
+    var arrRight=document.getElementById("arrRight");
+
+    //定义一个图片散开的函数
+    sanKai();
+    function sanKai() {
+         for(var i=0;i<lis.length;i++){
+             console.log(i);
+             animate2(lis[i],config[i]);
+         }
+    }
+    //三角剪头的显示和隐藏
+    wrap.onmouseover=function () {
+         animate2(arrow,{opacity:1});
+    }
+    //隐藏：
+    wrap.onmouseout=function () {
+         animate2(arrow,{opacity:0})
+    }
+     //剪头的点击事件
+    arrRight.onclick=function () {
+          var first=config.shift() //在最前面面删除
+          config.push(first);//在后面添加
+          sanKai();
+    }
+    arrLeft.onclick=function () {
+          var last=config.pop();
+          config.unshift(last);
+          sanKai();
+    }
+
+</script>
+</html>
